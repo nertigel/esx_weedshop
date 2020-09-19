@@ -1,7 +1,3 @@
----------------------------------------
---     ESX_WEEDSHOP by Dividerz      --
--- FOR SUPPORT: Arne#7777 on Discord --
----------------------------------------
 
 ESX = nil
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
@@ -28,9 +24,9 @@ ESX.RegisterServerCallback('esx_weedshop:callback:getPlayerCashMoney', function(
     local sourcePlayer = ESX.GetPlayerFromId(source)
     
     if Config.usingWeight then
-        local amount = sourcePlayer.getAccount('money').money
-    else
         local amount = sourcePlayer.getMoney()
+    else
+        local amount = sourcePlayer.getAccount('money').money
     end
 
     if amount ~= nil then
