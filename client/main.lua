@@ -19,6 +19,7 @@ ESX = nil
 weedamount = 0
 jointamount = 0
 registeramount = 0
+local shouldDelay = false
 
 Citizen.CreateThread(function()
 	while ESX == nil do
@@ -29,8 +30,6 @@ Citizen.CreateThread(function()
 	while ESX.GetPlayerData().job == nil do
 		Citizen.Wait(10)
 	end
-
-	ESX.PlayerData = ESX.GetPlayerData()
 end)
 
 Citizen.CreateThread(function()
@@ -61,41 +60,99 @@ Citizen.CreateThread(function()
         if ESX.PlayerData.job and ESX.PlayerData.job.name == Config.JobName  then
             -- WEED STORAGE
             if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.job.StorageCheck.x, Config.Weedshop.job.StorageCheck.y, Config.Weedshop.job.StorageCheck.z, true) < 4) then
-                DrawText3D(Config.Weedshop.job.StorageCheck.x, Config.Weedshop.job.StorageCheck.y, Config.Weedshop.job.StorageCheck.z+0.15, 'Storage: ~y~' .. weedamount .. '~w~ weed')
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Storage: ~y~' .. weedamount .. '~w~ weed',
+                    x = Config.Weedshop.job.StorageCheck.x,
+                    y = Config.Weedshop.job.StorageCheck.y,
+                    z = Config.Weedshop.job.StorageCheck.z+0.15
+                })
             end
 
             -- JOINT STORAGE + JOINT CRAFTING
             if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.job.CreateJoint.x, Config.Weedshop.job.CreateJoint.y, Config.Weedshop.job.CreateJoint.z, true) < 1.5) then
-                DrawText3D(Config.Weedshop.job.CreateJoint.x, Config.Weedshop.job.CreateJoint.y, Config.Weedshop.job.CreateJoint.z+0.28, 'Storage: ~y~' .. jointamount .. '~w~ joints')
-                DrawText3D(Config.Weedshop.job.CreateJoint.x, Config.Weedshop.job.CreateJoint.y, Config.Weedshop.job.CreateJoint.z+0.15, '~g~E~w~ - Roll joint')
-                if IsControlJustReleased(0, Keys["E"]) then
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Storage: ~y~' .. jointamount .. '~w~ joints',
+                    x = Config.Weedshop.job.CreateJoint.x,
+                    y = Config.Weedshop.job.CreateJoint.y,
+                    z = Config.Weedshop.job.CreateJoint.z+0.28
+                })
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = '[~g~E~s~] - Roll joint',
+                    x = Config.Weedshop.job.CreateJoint.x,
+                    y = Config.Weedshop.job.CreateJoint.y,
+                    z = Config.Weedshop.job.CreateJoint.z+0.15
+                })
+                if IsControlJustReleased(0, Keys["E"]) and not shouldDelay then
                     if weedamount > 0 then
+                        shouldDelay = true
                         TaskStartScenarioInPlace(playerPed, 'PROP_HUMAN_BUM_BIN', 0, true)
-                        exports['progressBars']:startUI(5000, "Rolling joint...")
-                        Citizen.Wait(5000)
-                        TriggerServerEvent('esx_weedshop:server:createJoint')
+                        local finished = exports["nert_taskbar"]:taskBar(Config.JointRollingTime, "Rolling joint...")
+                        if finished == 100 then
+                            TriggerServerEvent('esx_weedshop:server:createJoint')
+                            shouldDelay = false
+                        end
                         ClearPedTasksImmediately(playerPed)
                     else
                         ESX.ShowNotification('There is not enough weed in the storage...')
                     end
                 end
             elseif (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.job.CreateJoint.x, Config.Weedshop.job.CreateJoint.y, Config.Weedshop.job.CreateJoint.z, true) < 4) then
-                DrawText3D(Config.Weedshop.job.CreateJoint.x, Config.Weedshop.job.CreateJoint.y, Config.Weedshop.job.CreateJoint.z+0.15, 'Worktable')
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Worktable',
+                    x = Config.Weedshop.job.CreateJoint.x,
+                    y = Config.Weedshop.job.CreateJoint.y,
+                    z = Config.Weedshop.job.CreateJoint.z+0.15
+                })
             end
 
             -- REGISTER
             if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.job.Register.x, Config.Weedshop.job.Register.y, Config.Weedshop.job.Register.z, true) < 1.5) then
-                DrawText3D(Config.Weedshop.job.Register.x, Config.Weedshop.job.Register.y, Config.Weedshop.job.Register.z+0.28, 'Register: ~g~$' .. registeramount .. '~w~ cash')
-                DrawText3D(Config.Weedshop.job.Register.x, Config.Weedshop.job.Register.y, Config.Weedshop.job.Register.z+0.15, '~g~E~w~ - Get cash money')
-                if IsControlJustReleased(0, Keys["E"]) then
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Register: ~g~$' .. registeramount .. '~w~ cash',
+                    x = Config.Weedshop.job.Register.x,
+                    y = Config.Weedshop.job.Register.y,
+                    z = Config.Weedshop.job.Register.z+0.28
+                })
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = '[~g~E~s~] - Get cash money',
+                    x = Config.Weedshop.job.Register.x,
+                    y = Config.Weedshop.job.Register.y,
+                    z = Config.Weedshop.job.Register.z+0.15
+                })
+                if IsControlJustReleased(0, Keys["E"]) and not shouldDelay then
+                    shouldDelay = true
                     if registeramount > 0 then
-                        TriggerServerEvent('esx_weedshop:server:getRegisterMoney', registeramount)
+                        local finished = exports["nert_taskbar"]:taskBar(5000, "Taking money from register")
+                        if finished == 100 then
+                            TriggerServerEvent('esx_weedshop:server:getRegisterMoney', registeramount)
+                        end
+                        Citizen.Wait(5000)
+                        shouldDelay = false
                     else
                         ESX.ShowNotification('There is no money in the register')
                     end
                 end
             elseif (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.job.Register.x, Config.Weedshop.job.Register.y, Config.Weedshop.job.Register.z, true) < 4) then
-                DrawText3D(Config.Weedshop.job.Register.x, Config.Weedshop.job.Register.y, Config.Weedshop.job.Register.z+0.15, 'Register')
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Register',
+                    x = Config.Weedshop.job.Register.x,
+                    y = Config.Weedshop.job.Register.y,
+                    z = Config.Weedshop.job.Register.z+0.15
+                })
             end
         end -- END JOB MARKERS
 
@@ -103,13 +160,31 @@ Citizen.CreateThread(function()
         if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z, true) < 5) then
             DrawMarker(2, Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z-0.20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.3, 0.15, 255, 255, 255, 200, 0, 0, 0, 1, 0, 0, 0)
             if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z, true) < 1) then
-                DrawText3D(Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z+0.28, 'There are ~g~' .. jointamount .. '~w~ joints left')
-                DrawText3D(Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z+0.15, '~g~E~w~ - Buy joint for $' .. Config.JointPrice)
-                if IsControlJustReleased(0, Keys["E"]) then
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'There are ~g~' .. jointamount .. '~w~ joints left',
+                    x = Config.Weedshop.player.Counter.x,
+                    y = Config.Weedshop.player.Counter.y,
+                    z = Config.Weedshop.player.Counter.z+0.28
+                })
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = '[~g~E~s~] - Buy joint for $' .. Config.JointPrice,
+                    x = Config.Weedshop.player.Counter.x,
+                    y = Config.Weedshop.player.Counter.y,
+                    z = Config.Weedshop.player.Counter.z+0.15
+                })
+                if IsControlJustReleased(0, Keys["E"]) and not shouldDelay then
+                    shouldDelay = true
                     if jointamount > 0 then
                         ESX.TriggerServerCallback('esx_weedshop:callback:getPlayerCashMoney', function(amount)
                             if amount >= Config.JointPrice then
-                                TriggerServerEvent('esx_weedshop:server:buyJoint', Config.JointPrice)
+                                local finished = exports["nert_taskbar"]:taskBar(Config.JointRollingTime, "Picking a joint")
+                                if finished == 100 then
+                                    TriggerServerEvent('esx_weedshop:server:buyJoint', Config.JointPrice)
+                                end
                             else
                                 ESX.ShowNotification('You do not have enough money to buy a joint.')
                             end
@@ -117,9 +192,18 @@ Citizen.CreateThread(function()
                     else
                         ESX.ShowNotification('There are no joints left in our storage...')
                     end
+                    Citizen.Wait(5000)
+                    shouldDelay = false
                 end
             elseif (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z, true) < 4) then
-                DrawText3D(Config.Weedshop.player.Counter.x, Config.Weedshop.player.Counter.y, Config.Weedshop.player.Counter.z+0.15, 'Shop')
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Shop',
+                    x = Config.Weedshop.player.Counter.x,
+                    y = Config.Weedshop.player.Counter.y,
+                    z = Config.Weedshop.player.Counter.z+0.15
+                })
             end
         end
 
@@ -127,22 +211,40 @@ Citizen.CreateThread(function()
         if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.player.SellLocation.x, Config.Weedshop.player.SellLocation.y, Config.Weedshop.player.SellLocation.z, true) < 5) then
             DrawMarker(2, Config.Weedshop.player.SellLocation.x, Config.Weedshop.player.SellLocation.y, Config.Weedshop.player.SellLocation.z-0.20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.3, 0.15, 255, 255, 255, 200, 0, 0, 0, 1, 0, 0, 0)
             if (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.player.SellLocation.x, Config.Weedshop.player.SellLocation.y, Config.Weedshop.player.SellLocation.z, true) < 1.5) then
-                DrawText3D(Config.Weedshop.player.SellLocation.x, Config.Weedshop.player.SellLocation.y, Config.Weedshop.player.SellLocation.z+0.15, '~g~E~w~ - Sell weed')
-                if IsControlJustReleased(0, Keys["E"]) then
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = '[~g~E~s~] - Sell weed',
+                    x = Config.Weedshop.player.SellLocation.x,
+                    y = Config.Weedshop.player.SellLocation.y,
+                    z = Config.Weedshop.player.SellLocation.z+0.15
+                })
+                if IsControlJustReleased(0, Keys["E"]) and not shouldDelay then
+                    shouldDelay = true
                     ESX.TriggerServerCallback('esx_weedshop:callback:checkPlayerWeed', function(cb)
                         if cb then
                             TaskStartScenarioInPlace(playerPed, 'PROP_HUMAN_BUM_BIN', 0, true)
-                            exports['progressBars']:startUI(2000, "Selling weed...")
-                            Citizen.Wait(2000)
-                            TriggerServerEvent('esx_weedshop:server:sellWeed')
+                            local finished = exports["nert_taskbar"]:taskBar(Config.WeedSellTime, "Selling weed...")
+                            if finished == 100 then 
+                                TriggerServerEvent('esx_weedshop:server:sellWeed')
+                            end
                             ClearPedTasksImmediately(playerPed)
                         else
                             ESX.ShowNotification('You do not have any kind of weed on you...')
                         end
                     end)
+                    Citizen.Wait(1000)
+                    shouldDelay = false
                 end
             elseif (GetDistanceBetweenCoords(playerPosition, Config.Weedshop.player.SellLocation.x, Config.Weedshop.player.SellLocation.y, Config.Weedshop.player.SellLocation.z, true) < 4) then
-                DrawText3D(Config.Weedshop.player.SellLocation.x, Config.Weedshop.player.SellLocation.y, Config.Weedshop.player.SellLocation.z+0.15, 'Coffeeshop backdoor')
+                exports['nert_core']:drawText3D({
+                    scale = 0.35,
+                    font = 4,
+                    text = 'Coffeeshop backdoor',
+                    x = Config.Weedshop.player.SellLocation.x,
+                    y = Config.Weedshop.player.SellLocation.y,
+                    z = Config.Weedshop.player.SellLocation.z+0.15
+                })
             end
         end
     end
@@ -160,17 +262,10 @@ Citizen.CreateThread(function()
     EndTextCommandSetBlipName(blip)
 end)
 
-DrawText3D = function(x, y, z, text)
-	SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry("STRING")
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(x,y,z, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
-    ClearDrawOrigin()
-end
+--[[job updater -//- nertigel's method]]
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(5000)
+        ESX.PlayerData = ESX.GetPlayerData()
+    end
+end)
